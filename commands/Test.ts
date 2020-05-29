@@ -29,18 +29,18 @@ export class Test implements ISlashCommand {
         // const rc_crm_url = await read.getEnvironmentReader().getSettings().getValueById('rc_crm_url');
         // const flow_media_token = await read.getEnvironmentReader().getSettings().getValueById('flow_media_token');
 
-        const site_url = await read.getEnvironmentReader().getServerSettings().getValueById("Site_Url")
-        console.log("Site Url: ", site_url)
-        // const site_name = await read.getEnvironmentReader().getServerSettings().getValueById("Site_Name")
-        const x_auth_tkn = await read.getEnvironmentReader().getSettings().getValueById("rc_ptkn")
-        const x_user_id = await read.getEnvironmentReader().getSettings().getValueById("rc_uid")
-        console.log("Auths: ", x_auth_tkn, x_user_id)
-        // console.log("fields: ", slug, push_token, close_tckt_flow, queued_token_flow, taken_token_flow, base_url, rc_crm_url,  flow_media_token)
-        // console.log("Server settings: ", site_url, site_name)
+        // const site_url = await read.getEnvironmentReader().getServerSettings().getValueById("Site_Url")
+        // console.log("Site Url: ", site_url)
+        // // const site_name = await read.getEnvironmentReader().getServerSettings().getValueById("Site_Name")
+        // const x_auth_tkn = await read.getEnvironmentReader().getSettings().getValueById("rc_ptkn")
+        // const x_user_id = await read.getEnvironmentReader().getSettings().getValueById("rc_uid")
+        // console.log("Auths: ", x_auth_tkn, x_user_id)
+        // // console.log("fields: ", slug, push_token, close_tckt_flow, queued_token_flow, taken_token_flow, base_url, rc_crm_url,  flow_media_token)
+        // // console.log("Server settings: ", site_url, site_name)
 
-        const departments = await http.get(site_url + "/api/v1/livechat/department", {headers: {"X-Auth-Token": x_auth_tkn, "X-User-Id": x_user_id}})
+        // const departments = await http.get(site_url + "/api/v1/livechat/department", {headers: {"X-Auth-Token": x_auth_tkn, "X-User-Id": x_user_id}})
 
-        console.log(departments)
+        console.log("AAAAAAAAAAAAa")
 
     } 
 

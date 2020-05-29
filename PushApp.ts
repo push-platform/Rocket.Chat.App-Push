@@ -15,7 +15,7 @@ import { PushEndpoint } from './endpoints/PushEndpoint';
 export class PushApp extends App {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
         super(info, logger, accessors);
-        
+
     }
 
     async extendConfiguration(configuration: IConfigurationExtend, environmentRead: IEnvironmentRead): Promise<void> {
