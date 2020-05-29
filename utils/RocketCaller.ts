@@ -1,63 +1,87 @@
-import { IRead, IHttp } from "@rocket.chat/apps-engine/definition/accessors"
+import { IRead, IHttp, IHttpResponse } from "@rocket.chat/apps-engine/definition/accessors"
 
 export class RocketCaller {
-    static x_auth_token = ""
-    static x_user_id = ""
+    public static x_auth_token = ""
+    public static x_user_id = ""
+    public static site_url = ""
 
-    public static async rocketDepartmentIdFromName(read : IRead, http : IHttp, department_name) : Promise<string> {
+    public static getAuthHeaders() {
+        return {"X-Auth-Token": RocketCaller.x_auth_token, "X-User-Id": RocketCaller.x_user_id}
+    }
 
-        const site_url = await read.getEnvironmentReader().getServerSettings().getValueById("Site_Url")
+    public static async rocketDepartmentIdFromName(http : IHttp, department_name) : Promise<string> {
 
-        const departments_response = await http.get(site_url + "/api/v1/livechat/department", {
-            headers: {"X-Auth-Token": RocketCaller.x_auth_token, "X-User-Id": RocketCaller.x_user_id}
+        const departmentsResponse = await http.get(RocketCaller.site_url + "/api/v1/livechat/department", {
+            headers: RocketCaller.getAuthHeaders()
         })
-        if(!departments_response.content) {
+        if(!departmentsResponse.content) {
             throw Error("Failed to get department Id from name")
         }
 
-        const departments = JSON.parse(departments_response.content).departments
+        const departments = JSON.parse(departmentsResponse.content).departments
 
         const department = departments.find( e => e.name === department_name )
 
         return department._id
     }
 
-    public static async rocketCreateVisitor(read : IRead,  http : IHttp, visitor) : Promise<object> {
-        
-        const site_url = await read.getEnvironmentReader().getServerSettings().getValueById("Site_Url")
+    public static async rocketCreateVisitor(http : IHttp, visitor) : Promise<IHttpResponse> {
+    
 
-        const visitor_response = await http.post(site_url + "/api/v1/livechat/visitor", 
+        const visitorResponse = await http.post(RocketCaller.site_url + "/api/v1/livechat/visitor", 
             {
-                headers: {"X-Auth-Token": RocketCaller.x_auth_token, "X-User-Id": RocketCaller.x_user_id},
-                content: visitor
+                headers: RocketCaller.getAuthHeaders(),
+                content: JSON.stringify(visitor)
             }
         )
 
-        console.log("Visitor response: ", visitor_response)
+        console.log("Visitor response: ", visitorResponse)
 
-        return visitor_response
+        return visitorResponse
 
     }
 
-    public static async rocketCreateRoom(read : IRead,  http : IHttp, visitor_token, priority?) : Promise<object> {
+    public static async rocketCreateRoom(http : IHttp, visitorToken, priority?) : Promise<IHttpResponse> {
 
-        const site_url = await read.getEnvironmentReader().getServerSettings().getValueById("Site_Url")
-
+        // TODO: Check priority field for eterprise editions
         const payload = {
-            token: visitor_token,
-            priority: priority
+            token: visitorToken,
+            // priority: priority ? priority : "null" 
         }
 
-        const room_response = await http.get(site_url + "/api/v1/livechat/room", 
+        const roomResponse = await http.get(RocketCaller.site_url + "/api/v1/livechat/room", 
             {
-                headers: {"X-Auth-Token": RocketCaller.x_auth_token, "X-User-Id": RocketCaller.x_user_id},
+                headers: RocketCaller.getAuthHeaders(),
                 params: payload
             }
         )
 
-        console.log("Room response: ", room_response)
+        console.log("Room response: ", roomResponse)
 
-        return room_response
+        return roomResponse
         
     }
+
+    public static async rocketCreateVisitorMessage(http : IHttp, token : string, roomId : string, message : string) : Promise<IHttpResponse> {
+
+        const payload = {
+            token: token,
+            rid: roomId,
+            msg: message
+        }
+
+        const visitorMessageResponse = await http.post(RocketCaller.site_url + "/api/v1/livechat/message", 
+            {
+                headers: RocketCaller.getAuthHeaders(),
+                data: payload
+            }
+        )
+
+        console.log("Visitor Message Response: ", visitorMessageResponse)
+
+        return visitorMessageResponse
+        
+    }
+
+
 }
