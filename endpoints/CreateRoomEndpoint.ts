@@ -1,13 +1,12 @@
 import { ApiEndpoint, IApiResponse, IApiRequest, IApiEndpointInfo } from "@rocket.chat/apps-engine/definition/api";
 import { IRead, IModify, IHttp, IPersistence, HttpStatusCode } from "@rocket.chat/apps-engine/definition/accessors";
-import { RocketCaller } from "../utils/RocketCaller";
-import { RapidproCaller } from "../utils/RapidproCaller";
+import { RocketUtils } from "../utils/RocketUtils";
+import { RapidproUtils } from "../utils/RapidproUtils";
 import { IApiResponseJSON } from "@rocket.chat/apps-engine/definition/api/IResponse";
+import { CACHE_KEY_ROOM_ID } from '../utils/settings'
 
-const CACHE_KEY_ROOM_ID = "room_contact_uuid_"
-
-export class PushEndpoint extends ApiEndpoint {
-    public path = "push/webhook";   
+export class CreateRoomEndpoint extends ApiEndpoint {
+    public path = "create-room/webhook";   
     
     public async get(
         request: IApiRequest,
@@ -18,7 +17,6 @@ export class PushEndpoint extends ApiEndpoint {
         persis: IPersistence
     ) : Promise<IApiResponseJSON> {
 
-        const org_id = request.query.orgId;
         const department_name = request.query.department;
         let contact_uuid = request.query.contactUuid;
         const priority = request.params.priority;
@@ -26,19 +24,22 @@ export class PushEndpoint extends ApiEndpoint {
         if (!contact_uuid) {
             contact_uuid = request.query.token;
         }
-
-        RocketCaller.x_auth_token = request.headers["x-auth-token"]
-        RocketCaller.x_user_id = request.headers["x-user-id"]
-        console.log("Before set: ", RocketCaller.site_url)
-        RocketCaller.site_url = await read.getEnvironmentReader().getServerSettings().getValueById("Site_Url")
-        console.log("After set: ", RocketCaller.site_url)
-        // console.log("Request Auth-Token and User-Id: ", request.headers["x-auth-token"], request.headers["x-user-id"])
         
-        const newRoom = await this.createRoom(read, http,visitor, priority, department_name, contact_uuid);
+        const xauth = request.headers["x-auth-token"];
+        const xuser = request.headers["x-user-id"];
+        const siteUrl = await read.getEnvironmentReader().getServerSettings().getValueById("Site_Url");    
+        const timeoutValue = await read.getEnvironmentReader().getSettings().getValueById("timeout_value");       
+        const rocketUtils = new RocketUtils(read, http, xauth, xuser, siteUrl, timeoutValue);
+
+        const baseUrl = await read.getEnvironmentReader().getSettings().getValueById("base_url")
+        const authToken = await read.getEnvironmentReader().getSettings().getValueById("push_token")
+        const closeTicket = await read.getEnvironmentReader().getSettings().getValueById("close_tckt_flow")
+        const rapidProUtils = new RapidproUtils(read, http, baseUrl, authToken, closeTicket);
+        
+        const newRoom = await this.createRoom(rocketUtils, rapidProUtils, visitor, priority, department_name, contact_uuid);
 
         return newRoom
 
-        // return this.success();
     }
 
     public getVisitorFromParams(params: object): object {
@@ -57,43 +58,42 @@ export class PushEndpoint extends ApiEndpoint {
         visitor["customFields"] = []
         customFields.map(e => {
             visitor["customFields"].push(e)
-            // Object.assign(visitor["customFields"], e);
         })
 
         return {visitor: visitor};
     }
 
-    public async createRoom(read : IRead, http : IHttp, visitor, priority, department_name, contact_uuid, msgs_after?) : Promise<IApiResponseJSON> {
+    public async createRoom(rocketUtils, rapidProUtils, visitor, priority, department_name, contact_uuid, msgs_after?) : Promise<IApiResponseJSON> {
 
         const key = CACHE_KEY_ROOM_ID.concat(contact_uuid)
 
         if(department_name) {
-            const department_id = await RocketCaller.rocketDepartmentIdFromName(http, department_name);
+            const department_id = await rocketUtils.departmentIdFromName(department_name);
             visitor.visitor["department"] = department_id;
         }
 
         const token = visitor.visitor.token;
-        const createdVisitor = await RocketCaller.rocketCreateVisitor(http, visitor)
-        const createdRoom = await RocketCaller.rocketCreateRoom(http, token, priority)
+        const createdVisitor = await rocketUtils.createVisitor(visitor)
+        const createdRoom = await rocketUtils.createRoom(token, priority)
         const after = msgs_after ? msgs_after : this.getNowDate()  
-        const logMessage = await RapidproCaller.rapidGetLogMessages(read, http, contact_uuid, after)
+        const logMessage = await rapidProUtils.getLogMessages(contact_uuid, after)
 
         if(createdVisitor.statusCode !== 200) {
-
+            return createdVisitor
         } else if(createdRoom.statusCode !== 200) {
-
+            return createdRoom
         }
 
         const room = createdRoom.data.room
 
         if(logMessage) {
             const roomId = room._id
-            RocketCaller.rocketCreateVisitorMessage(http, token, roomId, logMessage)
+            await rocketUtils.createVisitorMessage(token, roomId, logMessage)
         }
 
         const roomResponse : IApiResponseJSON = {
             status: HttpStatusCode.OK,
-            content: createdRoom.data
+            content: createdRoom.data,
         }
         
         return roomResponse
