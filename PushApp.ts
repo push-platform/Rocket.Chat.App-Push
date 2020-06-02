@@ -11,7 +11,7 @@ import { Test } from './commands/Test';
 import { ApiVisibility, ApiSecurity } from '@rocket.chat/apps-engine/definition/api';
 import { RocketEndpoint } from './endpoints/RocketEndpoint';
 import { CreateRoomEndpoint } from './endpoints/CreateRoomEndpoint';
-// import { ReceiveMessageEndpoint } from './endpoints/ReceiveMessageEndpoint';
+import { ReceiveMessageEndpoint } from './endpoints/ReceiveMessageEndpoint';
 
 export class PushApp extends App {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
@@ -27,7 +27,7 @@ export class PushApp extends App {
             endpoints: [
                 new RocketEndpoint(this),
                 new CreateRoomEndpoint(this),
-                // new ReceiveMessageEndpoint(this)
+                new ReceiveMessageEndpoint(this)
             ]
         })
 
