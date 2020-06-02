@@ -10,7 +10,8 @@ import { SettingType } from '@rocket.chat/apps-engine/definition/settings';
 import { Test } from './commands/Test';
 import { ApiVisibility, ApiSecurity } from '@rocket.chat/apps-engine/definition/api';
 import { RocketEndpoint } from './endpoints/RocketEndpoint';
-import { PushEndpoint } from './endpoints/PushEndpoint';
+import { CreateRoomEndpoint } from './endpoints/CreateRoomEndpoint';
+// import { ReceiveMessageEndpoint } from './endpoints/ReceiveMessageEndpoint';
 
 export class PushApp extends App {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
@@ -25,7 +26,8 @@ export class PushApp extends App {
             security: ApiSecurity.UNSECURE,
             endpoints: [
                 new RocketEndpoint(this),
-                new PushEndpoint(this)
+                new CreateRoomEndpoint(this),
+                // new ReceiveMessageEndpoint(this)
             ]
         })
 
@@ -118,6 +120,15 @@ export class PushApp extends App {
             public: false,
             i18nLabel: 'Flow Media Token',
         });
+
+        await configuration.settings.provideSetting({
+            id:  "timeout_value",
+            type: SettingType.NUMBER,
+            packageValue: 30,
+            required: true,
+            public: false,
+            i18nLabel: 'Timeout (sec)',
+        });        
 
         configuration.slashCommands.provideSlashCommand(new Test(this))
                 
