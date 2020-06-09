@@ -1,88 +1,83 @@
-import { ApiEndpoint, IApiResponse, IApiRequest, IApiEndpointInfo } from "@rocket.chat/apps-engine/definition/api";
-import { IRead, IModify, IHttp, IPersistence } from "@rocket.chat/apps-engine/definition/accessors";
-import { isRegExp } from "util";
-import { RocketCaller } from "../utils/RocketCaller";
-
-const CACHE_KEY_ROOM_ID = "room_contact_uuid_"
+import { HttpStatusCode, IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
+import { ApiEndpoint, IApiEndpointInfo, IApiRequest, IApiResponse } from '@rocket.chat/apps-engine/definition/api';
+import { IApiResponseJSON } from '@rocket.chat/apps-engine/definition/api/IResponse';
+import { getNowDate } from '../utils/DateUtils';
+import { RocketCaller } from '../utils/RocketCaller';
+import { pushEndpointValidateQuery } from '../utils/validateUtils';
 
 export class PushEndpoint extends ApiEndpoint {
-    public path = "push/webhook";   
-    
+    public path = 'push/webhook';
+
     public async get(
         request: IApiRequest,
         endpoint: IApiEndpointInfo,
-        read: IRead, 
+        read: IRead,
         modify: IModify,
         http: IHttp,
-        persis: IPersistence
-    ) : Promise<IApiResponse> {
+        persis: IPersistence,
+    ): Promise<IApiResponse> {
 
-        const org_id = request.query.orgId;
-        const department_name = request.query.department;
-        let contact_uuid = request.query.contactUuid;
+        this.app.getLogger().debug(request);
+
+        const errors = pushEndpointValidateQuery(request.query);
+
+        if (errors) {
+            const errorResponse: IApiResponseJSON = {
+                status: HttpStatusCode.BAD_REQUEST,
+                content: {'Invalid query parameters...': JSON.stringify(errors)},
+            };
+            this.app.getLogger().error(`Invalid query parameters...: ${JSON.stringify(errors)}`);
+            return errorResponse;
+        }
+
+        const departmentName = request.query.department;
+        const token = request.query.token;
         const priority = request.params.priority;
         const visitor = this.getVisitorFromParams(request.query);
-        if (!contact_uuid) {
-            contact_uuid = request.query.token;
-        }
-        
-        RocketCaller.x_auth_token = request.headers["x-auth-token"]
-        RocketCaller.x_user_id = request.headers["x-user-id"]
-        // console.log("Request Auth-Token and User-Id: ", request.headers["x-auth-token"], request.headers["x-user-id"])
-        
-        const newRoom = await this.createRoom(read, http,visitor, priority, department_name, contact_uuid);
 
-        return newRoom
+        RocketCaller.xAuthToken = request.headers['x-auth-token'];
+        RocketCaller.xUserId = request.headers['x-user-id'];
 
-        // return this.success();
+        const newRoom = await this.createRoom(read, http, visitor, priority, departmentName, token);
+
+        return newRoom;
     }
 
     public getVisitorFromParams(params: object): object {
-        let visitor : object = {}
-        const customFields : object[] = [];
+        const visitor: {[key: string]: any} = {};
+        const customFields: Array<object> = [];
 
         Object.keys(params).map( (key, index) => {
-            if( ['name', 'email', 'token', 'phone'].includes(key) ) {
+            if (['name', 'email', 'token', 'phone'].includes(key) ) {
                 visitor[key] = params[key];
             } else {
-                let newField = {key: key, value: params[key]}
+                const newField = {key, value: params[key], overwrite: true};
                 customFields.push(newField);
             }
-        })
-        
-        visitor["customFields"] = {}
-        customFields.map(e => {
-            Object.assign(visitor["customFields"], e);
-        })
+        });
 
-        return {visitor: visitor};
+        visitor.customFields = [];
+        customFields.map( (e) => {
+            visitor.customFields.push(e);
+        });
+
+        return {visitor};
     }
 
-    public async createRoom(read : IRead, http : IHttp, visitor, priority, department_name, contact_uuid, msgs_after?) : Promise<IApiResponse> {
-        const key = CACHE_KEY_ROOM_ID.concat(contact_uuid)
-        // TODO: use Cache to store and get rooms 
-        if(department_name) {
-            const department_id = await RocketCaller.rocketDepartmentIdFromName(read, http, department_name);
-            visitor.visitor["department"] = department_id;
+    public async createRoom(read: IRead, http: IHttp, visitor, priority, departmentName, token, msgsAfter?): Promise<IApiResponse> {
+
+        // TODO: use Cache to store and get rooms
+        if (departmentName) {
+            const departmentId = await RocketCaller.rocketDepartmentIdFromName(read, http, departmentName);
+            visitor.visitor.department = departmentId;
         }
 
-        const token = visitor.visitor.token;
-        const createdVisitor = RocketCaller.rocketCreateVisitor(read, http, visitor)
-        const createdRoom = RocketCaller.rocketCreateRoom(read, http, token, priority)
-        const after = msgs_after ? msgs_after : this.getNowDate()
-        console.log("Now date: ", after)
-
-
-
+        const createdVisitor = RocketCaller.rocketCreateVisitor(read, http, visitor);
+        const createdRoom = RocketCaller.rocketCreateRoom(read, http, token, priority);
+        const after = msgsAfter ? msgsAfter : getNowDate();
+        console.log('Now date: ', after);
 
         return this.success();
     }
-
-    public getNowDate() : string {
-        let date = new Date();
-        let now = date.toJSON().slice(0, 10)
-        return now.concat(" 00:00:00+00:00")
-    }
-
 
 }

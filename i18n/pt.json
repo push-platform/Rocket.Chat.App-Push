@@ -1,0 +1,9 @@
+{
+    "Push_Token": "Token do Push",
+    "Close_Ticket_Flow": "Ticket de Fluxo para Fechar",
+    "Queued_Token_Flow": "Token de Fluxo para Enfileirar",
+    "Taken_Token_Flow": "Token de Fluxo para Pegar",
+    "Base_URL": "URL Base",
+    "RC_CRM_URL": "RC CRM URL",
+    "Flow_Media_Token": "Token de Fluxo de Mídias"
+}
