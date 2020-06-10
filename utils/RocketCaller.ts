@@ -4,7 +4,7 @@ export class RocketCaller {
     public static xAuthToken = '';
     public static xUserId = '';
 
-    public static async rocketDepartmentIdFromName(read: IRead, http: IHttp, departmentName: string): Promise<string> {
+    public static async rocketDepartmentIdFromName(read: IRead, http: IHttp, departmentName: string): Promise<string | null> {
 
         const siteUrl = await read.getEnvironmentReader().getServerSettings().getValueById('Site_Url');
 
@@ -20,21 +20,29 @@ export class RocketCaller {
 
         const department = departments.find( (e) => e.name === departmentName );
 
+        if (!department) {
+            return null;
+        }
+
         console.log('Department found: ', department);
 
         return department._id;
     }
 
-    public static async rocketCreateVisitor(read: IRead,  http: IHttp, visitor): Promise<object> {
+    public static async rocketCreateVisitor(read: IRead,  http: IHttp, visitor): Promise<object | null> {
 
         const siteUrl = await read.getEnvironmentReader().getServerSettings().getValueById('Site_Url');
 
         const visitorResponse = await http.post(siteUrl + '/api/v1/livechat/visitor',
             {
                 headers: {'X-Auth-Token': RocketCaller.xAuthToken, 'X-User-Id': RocketCaller.xUserId},
-                content: visitor,
+                content: JSON.stringify(visitor),
             },
         );
+
+        if (!visitorResponse) {
+            return null;
+        }
 
         console.log('Visitor response: ', visitorResponse);
 
@@ -42,7 +50,7 @@ export class RocketCaller {
 
     }
 
-    public static async rocketCreateRoom(read: IRead,  http: IHttp, visitorToken: string, priority?): Promise<object> {
+    public static async rocketCreateRoom(read: IRead,  http: IHttp, visitorToken: string, priority?): Promise<object | null> {
 
         const siteUrl = await read.getEnvironmentReader().getServerSettings().getValueById('Site_Url');
 
@@ -58,6 +66,10 @@ export class RocketCaller {
                 params: payload,
             },
         );
+
+        if (!roomResponse) {
+            return null;
+        }
 
         console.log('Room response: ', roomResponse);
 
