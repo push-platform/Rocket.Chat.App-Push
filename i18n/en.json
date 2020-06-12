@@ -1,9 +1,10 @@
 {
-    "Push_Token": "Push Token",
-    "Close_Ticket_Flow": "Close Ticket Flow",
-    "Queued_Token_Flow": "Queued Token Flow",
-    "Taken_Token_Flow": "Taken Token Flow",
-    "Base_URL": "Base URL",
-    "RC_CRM_URL": "RC CRM URL",
-    "Flow_Media_Token": "Flow Media Token"
+    "config_rc_crm_url": "RocketChat CRM URL",
+    
+    "config_push_base_url"   : "Push Base URL",
+    "config_push_token"      : "Push API Token",
+    "config_push_taken_flow" : "Taken Event",
+    "config_push_queued_flow": "Queued Event",
+    "config_push_closed_flow": "Closed Event",
+    "config_push_media_flow" : "Media Event"
 }
