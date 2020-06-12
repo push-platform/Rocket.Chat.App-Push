@@ -2,7 +2,7 @@ import { HttpStatusCode, IHttp, IModify, IPersistence, IRead } from '@rocket.cha
 import { ApiEndpoint, IApiEndpointInfo, IApiRequest, IApiResponse } from '@rocket.chat/apps-engine/definition/api';
 import { IApiResponseJSON } from '@rocket.chat/apps-engine/definition/api/IResponse';
 import { getNowDate } from '../utils/DateUtils';
-import { httpErrorResponse } from '../utils/responseUtils';
+import { httpErrorResponse } from '../utils/HttpUtils';
 import { RocketCaller } from '../utils/RocketCaller';
 import { pushEndpointValidateQuery } from '../utils/validateUtils';
 
@@ -65,7 +65,7 @@ export class PushEndpoint extends ApiEndpoint {
     public async createRoom(read: IRead, http: IHttp, visitor, priority, departmentName, token, msgsAfter?): Promise<IApiResponse> {
 
         // TODO: use Cache to store and get rooms
-        const departmentId = await RocketCaller.rocketDepartmentIdFromName(read, http, departmentName);
+        const departmentId = await RocketCaller.departmentIdFromName(read, http, departmentName);
         if (!departmentId) {
             const errorMessage = `Could not find department with name: ${departmentName}`;
             this.app.getLogger().error(errorMessage);
@@ -74,14 +74,14 @@ export class PushEndpoint extends ApiEndpoint {
 
         visitor.visitor.department = departmentId;
 
-        const createdVisitor = RocketCaller.rocketCreateVisitor(read, http, visitor);
+        const createdVisitor = RocketCaller.createVisitor(read, http, visitor);
         if (!createdVisitor) {
             const errorMessage = `Could not create visitor: ${visitor}`;
             this.app.getLogger().error(errorMessage);
             return httpErrorResponse(HttpStatusCode.BAD_REQUEST, errorMessage);
         }
 
-        const createdRoom = RocketCaller.rocketCreateRoom(read, http, token, priority);
+        const createdRoom = RocketCaller.createRoom(read, http, token, priority);
         if (!createdRoom) {
             const errorMessage = `Could not create room for visitor with token: ${token}`;
             this.app.getLogger().error(errorMessage);
