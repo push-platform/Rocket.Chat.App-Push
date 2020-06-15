@@ -1,5 +1,4 @@
 import { IHttp, IHttpResponse, IRead } from '@rocket.chat/apps-engine/definition/accessors';
-// import { RocketUtils } from "./RocketUtils"
 
 export class RapidproUtils {
     private readonly MESSAGE_CHUNK_SIZE: number = 640;
@@ -10,7 +9,7 @@ export class RapidproUtils {
     private baseUrl: string;
     private closeTicket: string;
 
-    public constructor(read: IRead, http: IHttp, baseUrl, authToken, closeTicket) {
+    public constructor(read: IRead, http: IHttp, baseUrl: string, authToken: string, closeTicket: string) {
         this.read = read;
         this.http = http;
         this.baseUrl = baseUrl;
@@ -26,7 +25,7 @@ export class RapidproUtils {
         return this.closeTicket;
     }
 
-    public async getLogMessages(token: string, after?: string): Promise<any> {
+    public async getLogMessages(token: string, after: string): Promise<any> {
 
         const messagesResponse = await this.getContactMessages(token, after);
         const messages = messagesResponse.data.results.reverse();
@@ -53,7 +52,7 @@ export class RapidproUtils {
         return messages ? (messages.length > 0 ? logMessage : null) : null;
     }
 
-    public async getContactMessages(token: string, after): Promise<IHttpResponse> {
+    public async getContactMessages(token: string, after: string): Promise<IHttpResponse> {
 
         const baseUrl = this.baseUrl;
 
@@ -71,7 +70,7 @@ export class RapidproUtils {
 
     }
 
-    public getDateTime(message) {
+    public getDateTime(message: any) {
         const sentOn = new Date(message.created_on);
         // TODO: check timezone effects
         // sentOn.setHours(sentOn.getHours() - (sentOn.getTimezoneOffset() / 60))
@@ -88,7 +87,7 @@ export class RapidproUtils {
         return `[${date}]: `;
     }
 
-    public getUserMessage(message) {
+    public getUserMessage(message: any) {
         const attachments = message.attachments;
 
         if (attachments && attachments.length > 0) {
@@ -103,11 +102,11 @@ export class RapidproUtils {
 
     }
 
-    public formatUserMessage(line, message) {
+    public formatUserMessage(line: string, message: any) {
         return message.direction === 'out' ? line : '`' + line + '`';
     }
 
-    public async broadcastMessages(messages, contacts) {
+    public async broadcastMessages(messages: Array<any>, contacts: Array<string>) {
         messages.map( (message) => {
             const msgText = message.msg;
 
@@ -119,6 +118,10 @@ export class RapidproUtils {
                 // msgText = emojione.shortnameToImage(msgText)
                 const msgs = this.chunkString(msgText, this.MESSAGE_CHUNK_SIZE);
 
+                if (!msgs) {
+                    return;
+                }
+
                 msgs.map( async (msg) => {
                     await this.broadcastMessage(msg, contacts);
                 });
@@ -128,12 +131,12 @@ export class RapidproUtils {
         });
     }
 
-    public chunkString(str, length) {
+    public chunkString(str: string, length: number) {
         return str.match(new RegExp('.{1,' + length + '}', 'g'));
     }
 
     // TODO: Check if there's a way to create a generic function to build payloads from n arguments
-    public buildBroadcastPayload(text: string, contacts?: Array<string>, urns?: Array<string>, groups?: Array<string>) {
+    public buildBroadcastPayload(text: string, contacts?: Array<string>, urns?: Array<string>, groups?: Array<string>): object {
         const payload = {
             text,
         };
@@ -151,7 +154,14 @@ export class RapidproUtils {
         return payload;
     }
 
-    public buildFlowStartPayload(flow, contacts?: Array<string>, urns?: Array<string>, groups?: Array<string>, restartParticipants?: boolean, params?: object) {
+    public buildFlowStartPayload(
+        flow: string,
+        contacts?: Array<string>,
+        urns?: Array<string>,
+        groups?: Array<string>,
+        restartParticipants?: boolean,
+        params?: object) {
+
         const payload = {
             flow,
         };
@@ -188,15 +198,14 @@ export class RapidproUtils {
         });
     }
 
-    public async closeSession(extra, contacts) {
+    public async closeSession(extra: object, contacts: Array<string>) {
 
         console.log('Starting close flow');
 
         const baseUrl = this.baseUrl;
         const url = `https://${baseUrl}/api/v2/flow_starts.json`;
 
-        const closeTicket = this.getCloseTicket();
-        const payload = this.buildFlowStartPayload(closeTicket, contacts, undefined, undefined, true, extra);
+        const payload = this.buildFlowStartPayload(this.closeTicket, contacts, undefined, undefined, true, extra);
 
         await this.http.post(url, {
             headers: this.getAuthorizationHeader(),

@@ -12,7 +12,7 @@ export class RocketUtils {
     private ROOM_API_PATH = '/api/v1/livechat/room';
     private MESSAGE_API_PATH = '/api/v1/livechat/message';
 
-    public constructor(read, http, xAuth, xUser, siteUrl, timeout) {
+    public constructor(read: IRead, http: IHttp, xAuth: string, xUser: string, siteUrl: string, timeout: number) {
         this.read = read;
         this.http = http;
         this.xAuthToken = xAuth;
@@ -21,7 +21,7 @@ export class RocketUtils {
         this.timeoutValue = timeout >= 5 ? timeout : 5;
     }
 
-    public async departmentIdFromName(departmentName): Promise<string | null> {
+    public async departmentIdFromName(departmentName: string): Promise<string | null> {
 
         const departmentsResponse = await this.http.get(this.siteUrl + this.DEPARTMENT_API_PATH, {
             headers: this.getAuthHeaders(),
@@ -45,7 +45,7 @@ export class RocketUtils {
         return department._id;
     }
 
-    public async createVisitor(visitor): Promise<IHttpResponse | null> {
+    public async createVisitor(visitor: object): Promise<IHttpResponse | null> {
 
         const visitorResponse = await this.http.post(this.siteUrl + this.VISITOR_API_PATH,
             {
@@ -65,7 +65,7 @@ export class RocketUtils {
 
     }
 
-    public async createRoom(visitorToken, priority?): Promise<IHttpResponse | null> {
+    public async createRoom(visitorToken: string, priority?: string): Promise<IHttpResponse | null> {
 
         // TODO: Check priority field for enterprise editions
         const payload = {
