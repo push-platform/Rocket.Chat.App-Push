@@ -4,9 +4,9 @@
     "requiredApiVersion": "^1.4.0",
     "iconFile": "icon.png",
     "author": {
-        "name": "Paulo Bernardo",
-        "homepage": "github.com/paulobernardoaf",
-        "support": "paulo.bernardo@ilhasoft.com.br"
+        "name": "Ilhasoft",
+        "homepage": "https://github.com/push-platform/Rocket.Chat.App-Push/",
+        "support": "https://github.com/push-platform/Rocket.Chat.App-Push/issues/"
     },
     "name": "PushApp",
     "nameSlug": "pushapp",

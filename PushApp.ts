@@ -1,136 +1,117 @@
 import {
     IAppAccessors,
-    ILogger,
     IConfigurationExtend,
     IEnvironmentRead,
+    ILogger,
 } from '@rocket.chat/apps-engine/definition/accessors';
+import { ApiSecurity, ApiVisibility } from '@rocket.chat/apps-engine/definition/api';
 import { App } from '@rocket.chat/apps-engine/definition/App';
 import { IAppInfo } from '@rocket.chat/apps-engine/definition/metadata';
 import { SettingType } from '@rocket.chat/apps-engine/definition/settings';
-import { Test } from './commands/Test';
-import { ApiVisibility, ApiSecurity } from '@rocket.chat/apps-engine/definition/api';
-import { RocketEndpoint } from './endpoints/RocketEndpoint';
 import { CreateRoomEndpoint } from './endpoints/CreateRoomEndpoint';
 import { ReceiveMessageEndpoint } from './endpoints/ReceiveMessageEndpoint';
+import {
+    PUSH_BASE_URL,
+    PUSH_CLOSED_FLOW,
+    PUSH_MEDIA_FLOW,
+    PUSH_QUEUED_FLOW,
+    PUSH_TAKEN_FLOW,
+    PUSH_TOKEN,
+    RC_CRM_URL,
+    RC_TIMEOUT,
+} from './settings/Constants';
 
 export class PushApp extends App {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
         super(info, logger, accessors);
-
     }
 
-    async extendConfiguration(configuration: IConfigurationExtend, environmentRead: IEnvironmentRead): Promise<void> {
+    public async extendConfiguration(configuration: IConfigurationExtend, environmentRead: IEnvironmentRead): Promise<void> {
+
+        // API
 
         await configuration.api.provideApi({
             visibility: ApiVisibility.PUBLIC,
             security: ApiSecurity.UNSECURE,
             endpoints: [
-                new RocketEndpoint(this),
+                new ReceiveMessageEndpoint(this),
                 new CreateRoomEndpoint(this),
-                new ReceiveMessageEndpoint(this)
-            ]
-        })
-
-        await configuration.settings.provideSetting({
-            id:  "rc_ptkn",
-            type: SettingType.STRING,
-            packageValue: '',
-            required: true,
-            public: false,
-            i18nLabel: 'Rocketchat Personal Access Token',
+            ],
         });
 
-        await configuration.settings.provideSetting({
-            id:  "rc_uid",
-            type: SettingType.STRING,
-            packageValue: '',
-            required: true,
-            public: false,
-            i18nLabel: 'Rocketchat User Id',
-        });
+        // Settings
 
         await configuration.settings.provideSetting({
-            id:  "slug",
-            type: SettingType.STRING,
-            packageValue: '',
-            required: true,
-            public: false,
-            i18nLabel: 'Slug',
-        });
-
-        await configuration.settings.provideSetting({
-            id:  "push_token",
-            type: SettingType.STRING,
-            packageValue: '',
-            required: true,
-            public: false,
-            i18nLabel: 'Push Token',
-        });
-
-        await configuration.settings.provideSetting({
-            id:  "close_tckt_flow",
-            type: SettingType.STRING,
-            packageValue: '',
-            required: true,
-            public: false,
-            i18nLabel: 'Close Ticket Flow',
-        });
-
-        await configuration.settings.provideSetting({
-            id:  "queued_token_flow",
+            id: RC_CRM_URL,
             type: SettingType.STRING,
             packageValue: '',
             required: false,
             public: false,
-            i18nLabel: 'Queued Token Flow',
-        });
-        
-        await configuration.settings.provideSetting({
-            id:  "taken_token_flow",
-            type: SettingType.STRING,
-            packageValue: '',
-            required: false,
-            public: false,
-            i18nLabel: 'Taken Token Flow',
+            i18nLabel: 'config_rc_crm_url',
         });
 
         await configuration.settings.provideSetting({
-            id:  "base_url",
+            id: PUSH_BASE_URL,
             type: SettingType.STRING,
             packageValue: '',
             required: true,
             public: false,
-            i18nLabel: 'Base URL',
+            i18nLabel: 'config_push_base_url',
         });
 
         await configuration.settings.provideSetting({
-            id:  "rc_crm_url",
+            id: PUSH_TOKEN,
+            type: SettingType.STRING,
+            packageValue: '',
+            required: true,
+            public: false,
+            i18nLabel: 'config_push_token',
+        });
+
+        await configuration.settings.provideSetting({
+            id: PUSH_TAKEN_FLOW,
             type: SettingType.STRING,
             packageValue: '',
             required: false,
             public: false,
-            i18nLabel: 'RC CRM URL',
+            i18nLabel: 'config_push_taken_flow',
         });
 
         await configuration.settings.provideSetting({
-            id:  "flow_media_token",
+            id: PUSH_QUEUED_FLOW,
             type: SettingType.STRING,
             packageValue: '',
             required: false,
             public: false,
-            i18nLabel: 'Flow Media Token',
+            i18nLabel: 'config_push_queued_flow',
         });
 
         await configuration.settings.provideSetting({
-            id:  "timeout_value",
+            id: PUSH_CLOSED_FLOW,
+            type: SettingType.STRING,
+            packageValue: '',
+            required: true,
+            public: false,
+            i18nLabel: 'config_push_closed_flow',
+        });
+
+        await configuration.settings.provideSetting({
+            id: PUSH_MEDIA_FLOW,
+            type: SettingType.STRING,
+            packageValue: '',
+            required: false,
+            public: false,
+            i18nLabel: 'config_push_media_flow',
+        });
+
+        await configuration.settings.provideSetting({
+            id:  RC_TIMEOUT,
             type: SettingType.NUMBER,
             packageValue: 30,
             required: true,
             public: false,
-            i18nLabel: 'Timeout (sec)',
-        });        
+            i18nLabel: 'config_push_timeout',
+        });
 
-        configuration.slashCommands.provideSlashCommand(new Test(this))
-                
     }
 }

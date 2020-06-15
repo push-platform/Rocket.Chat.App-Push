@@ -1,20 +1,20 @@
-import { ApiEndpoint, IApiResponse, IApiRequest, IApiEndpointInfo } from "@rocket.chat/apps-engine/definition/api";
-import { IRead, IModify, IHttp, IPersistence } from "@rocket.chat/apps-engine/definition/accessors";
+import { IHttp, IModify, IPersistence, IRead   } from '@rocket.chat/apps-engine/definition/accessors';
+import { ApiEndpoint, IApiEndpointInfo, IApiRequest, IApiResponse } from '@rocket.chat/apps-engine/definition/api';
 
 export class RocketEndpoint extends ApiEndpoint {
-    public path = "rocket/webhook";
-    
+    public path = 'rocket/webhook';
+
     public async post(
         request: IApiRequest,
         endpoint: IApiEndpointInfo,
-        read: IRead, 
+        read: IRead,
         modify: IModify,
         http: IHttp,
-        persis: IPersistence
-    ) : Promise<IApiResponse> {
+        persis: IPersistence,
+    ): Promise<IApiResponse> {
 
-        this.app.getLogger().debug(request)
-        console.log(">>: ", request)
+        this.app.getLogger().debug(request);
+        console.log('>>: ', request);
 
         return this.success();
     }
