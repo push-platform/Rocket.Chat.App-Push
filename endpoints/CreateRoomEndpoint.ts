@@ -1,6 +1,12 @@
 import { HttpStatusCode, IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { ApiEndpoint, IApiEndpointInfo, IApiRequest } from '@rocket.chat/apps-engine/definition/api';
 import { IApiResponseJSON } from '@rocket.chat/apps-engine/definition/api/IResponse';
+import {
+    PUSH_BASE_URL,
+    PUSH_CLOSED_FLOW,
+    PUSH_TOKEN,
+    REQUEST_TIMEOUT,
+    } from '../settings/Constants';
 import { getNowDate } from '../utils/DateUtils';
 import { httpErrorResponse } from '../utils/HttpUtils';
 import { RapidproUtils } from '../utils/RapidproUtils';
@@ -35,12 +41,12 @@ export class CreateRoomEndpoint extends ApiEndpoint {
         const xauth = request.headers['x-auth-token'];
         const xuser = request.headers['x-user-id'];
         const siteUrl = await read.getEnvironmentReader().getServerSettings().getValueById('Site_Url');
-        const timeoutValue = await read.getEnvironmentReader().getSettings().getValueById('timeout_value');
+        const timeoutValue = await read.getEnvironmentReader().getSettings().getValueById(REQUEST_TIMEOUT);
         const rocketUtils = new RocketUtils(read, http, xauth, xuser, siteUrl, timeoutValue);
 
-        const baseUrl = await read.getEnvironmentReader().getSettings().getValueById('base_url');
-        const authToken = await read.getEnvironmentReader().getSettings().getValueById('push_token');
-        const closeTicket = await read.getEnvironmentReader().getSettings().getValueById('close_tckt_flow');
+        const baseUrl = await read.getEnvironmentReader().getSettings().getValueById(PUSH_BASE_URL);
+        const authToken = await read.getEnvironmentReader().getSettings().getValueById(PUSH_TOKEN);
+        const closeTicket = await read.getEnvironmentReader().getSettings().getValueById(PUSH_CLOSED_FLOW);
         const rapidProUtils = new RapidproUtils(read, http, baseUrl, authToken, closeTicket);
 
         const newRoom = await this.createRoom(rocketUtils, rapidProUtils, visitor, priority, departmentName, token);
@@ -70,7 +76,15 @@ export class CreateRoomEndpoint extends ApiEndpoint {
         return {visitor};
     }
 
-    public async createRoom(rocketUtils, rapidProUtils, visitor, priority, departmentName, token, msgsAfter?): Promise<IApiResponseJSON> {
+    public async createRoom(
+        rocketUtils: RocketUtils,
+        rapidProUtils: RapidproUtils,
+        visitor: any,
+        priority: string,
+        departmentName: string,
+        token: string,
+        msgsAfter?: string,
+        ): Promise<IApiResponseJSON> {
 
         const departmentId = await rocketUtils.departmentIdFromName(departmentName);
         if (!departmentId) {
