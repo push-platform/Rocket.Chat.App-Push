@@ -1,8 +1,9 @@
 import { IHttp, IHttpResponse, IRead } from '@rocket.chat/apps-engine/definition/accessors';
-import { MESSAGE_CHUNK_SIZE } from './settings';
 // import { RocketUtils } from "./RocketUtils"
 
 export class RapidproUtils {
+    private readonly MESSAGE_CHUNK_SIZE: number = 640;
+
     private read: IRead;
     private http: IHttp;
     private authToken: string;
@@ -116,7 +117,7 @@ export class RapidproUtils {
             } else {
                 // TODO: Check how to handle emojis
                 // msgText = emojione.shortnameToImage(msgText)
-                const msgs = this.chunkString(msgText, MESSAGE_CHUNK_SIZE);
+                const msgs = this.chunkString(msgText, this.MESSAGE_CHUNK_SIZE);
 
                 msgs.map( async (msg) => {
                     await this.broadcastMessage(msg, contacts);
