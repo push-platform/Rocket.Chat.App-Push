@@ -1,12 +1,17 @@
 import { HttpStatusCode, IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { ApiEndpoint, IApiEndpointInfo, IApiRequest } from '@rocket.chat/apps-engine/definition/api';
 import { IApiResponseJSON } from '@rocket.chat/apps-engine/definition/api/IResponse';
+import {
+    PUSH_BASE_URL,
+    PUSH_CLOSED_FLOW,
+    PUSH_TOKEN,
+    REQUEST_TIMEOUT,
+    } from '../settings/Constants';
 import { getNowDate } from '../utils/DateUtils';
 import { httpErrorResponse } from '../utils/HttpUtils';
 import { RapidproUtils } from '../utils/RapidproUtils';
 import { RocketUtils } from '../utils/RocketUtils';
 import { pushEndpointValidateQuery } from '../utils/validateUtils';
-import { RC_TIMEOUT, PUSH_BASE_URL, PUSH_TOKEN, PUSH_CLOSED_FLOW } from '../settings/Constants';
 
 export class CreateRoomEndpoint extends ApiEndpoint {
     public path = 'create-room/webhook';
@@ -36,7 +41,7 @@ export class CreateRoomEndpoint extends ApiEndpoint {
         const xauth = request.headers['x-auth-token'];
         const xuser = request.headers['x-user-id'];
         const siteUrl = await read.getEnvironmentReader().getServerSettings().getValueById('Site_Url');
-        const timeoutValue = await read.getEnvironmentReader().getSettings().getValueById(RC_TIMEOUT);
+        const timeoutValue = await read.getEnvironmentReader().getSettings().getValueById(REQUEST_TIMEOUT);
         const rocketUtils = new RocketUtils(read, http, xauth, xuser, siteUrl, timeoutValue);
 
         const baseUrl = await read.getEnvironmentReader().getSettings().getValueById(PUSH_BASE_URL);
@@ -71,7 +76,15 @@ export class CreateRoomEndpoint extends ApiEndpoint {
         return {visitor};
     }
 
-    public async createRoom(rocketUtils, rapidProUtils, visitor, priority, departmentName, token, msgsAfter?): Promise<IApiResponseJSON> {
+    public async createRoom(
+        rocketUtils: RocketUtils,
+        rapidProUtils: RapidproUtils,
+        visitor: any,
+        priority: string,
+        departmentName: string,
+        token: string,
+        msgsAfter?: string,
+        ): Promise<IApiResponseJSON> {
 
         const departmentId = await rocketUtils.departmentIdFromName(departmentName);
         if (!departmentId) {
