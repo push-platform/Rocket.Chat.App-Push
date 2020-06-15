@@ -1,2 +1,11 @@
 export const MESSAGE_CHUNK_SIZE = 640;
-export const CACHE_KEY_ROOM_ID = "room_contact_uuid_";
+export const CONFIG_RC_ACCESS_TOKEN = 'rc_ptkn';
+export const CONFIG_RC_USER_ID = 'rc_uid';
+export const CONFIG_PUSH_TOKEN = 'push_token';
+export const CONFIG_CLOSE_TICKET_FLOW = 'close_tckt_flow';
+export const CONFIG_QUEUED_TOKEN_FLOW = 'queued_token_flow';
+export const CONFIG_TAKEN_TOKEN_FLOW = 'taken_token_flow';
+export const CONFIG_BASE_URL = 'base_url';
+export const CONFIG_RC_CRM_URL = 'rc_crm_url';
+export const CONFIG_FLOW_MEDIA_TOKEN = 'flow_media_token';
+export const CONFIG_TIMEOUT_VALUE = 'timeout_value';
