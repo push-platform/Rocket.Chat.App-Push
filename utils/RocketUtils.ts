@@ -10,7 +10,8 @@ export class RocketUtils {
     private DEPARTMENT_API_PATH = '/api/v1/livechat/department';
     private VISITOR_API_PATH = '/api/v1/livechat/visitor';
     private ROOM_API_PATH = '/api/v1/livechat/room';
-    private MESSAGE_API_PATH = '/api/v1/livechat/message';
+    private LIVECHAT_MESSAGE_API_PATH = '/api/v1/livechat/message';
+    private MESSAGE_API_PATH = '/api/v1/chat.getMessage';
 
     public constructor(read: IRead, http: IHttp, xAuth: string, xUser: string, siteUrl: string, timeout: number) {
         this.read = read;
@@ -99,7 +100,7 @@ export class RocketUtils {
             msg: message,
         };
 
-        const visitorMessageResponse = await this.http.post(this.siteUrl + this.MESSAGE_API_PATH,
+        const visitorMessageResponse = await this.http.post(this.siteUrl + this.LIVECHAT_MESSAGE_API_PATH,
             {
                 headers: this.getAuthHeaders(),
                 data: payload,
@@ -115,6 +116,22 @@ export class RocketUtils {
 
         return visitorMessageResponse;
 
+    }
+
+    public async getMessage(msgId: string) {
+
+        const payload = {
+            msgId,
+        };
+
+        const messageResponse = await this.http.get(this.siteUrl + this.MESSAGE_API_PATH,
+            {
+                headers: this.getAuthHeaders(),
+                params: payload,
+            },
+        );
+
+        return messageResponse;
     }
 
     public getAuthHeaders() {

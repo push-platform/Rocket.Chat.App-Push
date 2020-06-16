@@ -4,6 +4,7 @@ import { IApiResponseJSON } from '@rocket.chat/apps-engine/definition/api/IRespo
 import {
     PUSH_BASE_URL,
     PUSH_CLOSED_FLOW,
+    PUSH_MEDIA_FLOW,
     PUSH_TOKEN,
     REQUEST_TIMEOUT,
     } from '../settings/Constants';
@@ -47,7 +48,8 @@ export class CreateRoomEndpoint extends ApiEndpoint {
         const baseUrl = await read.getEnvironmentReader().getSettings().getValueById(PUSH_BASE_URL);
         const authToken = await read.getEnvironmentReader().getSettings().getValueById(PUSH_TOKEN);
         const closeTicket = await read.getEnvironmentReader().getSettings().getValueById(PUSH_CLOSED_FLOW);
-        const rapidProUtils = new RapidproUtils(read, http, baseUrl, authToken, closeTicket);
+        const mediaTicket = await read.getEnvironmentReader().getSettings().getValueById(PUSH_MEDIA_FLOW);
+        const rapidProUtils = new RapidproUtils(read, http, baseUrl, authToken, closeTicket, mediaTicket);
 
         const newRoom = await this.createRoom(rocketUtils, rapidProUtils, visitor, priority, departmentName, token);
 

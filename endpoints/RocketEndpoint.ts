@@ -1,6 +1,6 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { ApiEndpoint, IApiEndpointInfo, IApiRequest, IApiResponse } from '@rocket.chat/apps-engine/definition/api';
-import { PUSH_BASE_URL, PUSH_CLOSED_FLOW, PUSH_TOKEN } from '../settings/Constants';
+import { PUSH_BASE_URL, PUSH_CLOSED_FLOW, PUSH_MEDIA_FLOW, PUSH_TOKEN } from '../settings/Constants';
 import { RapidproUtils } from '../utils/RapidproUtils';
 
 export class RocketEndpoint extends ApiEndpoint {
@@ -18,8 +18,9 @@ export class RocketEndpoint extends ApiEndpoint {
         const baseUrl = await read.getEnvironmentReader().getSettings().getValueById(PUSH_BASE_URL);
         const authToken = await read.getEnvironmentReader().getSettings().getValueById(PUSH_TOKEN);
         const closeTicket = await read.getEnvironmentReader().getSettings().getValueById(PUSH_CLOSED_FLOW);
+        const mediaTicket = await read.getEnvironmentReader().getSettings().getValueById(PUSH_MEDIA_FLOW);
 
-        const rapidProUtils = new RapidproUtils(read, http, baseUrl, authToken, closeTicket);
+        const rapidProUtils = new RapidproUtils(read, http, baseUrl, authToken, closeTicket, mediaTicket);
 
         const rc = request.content;
         console.log('Request Content Object: ', rc);
