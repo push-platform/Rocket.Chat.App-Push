@@ -1,7 +1,7 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { ApiEndpoint, IApiEndpointInfo, IApiRequest, IApiResponse } from '@rocket.chat/apps-engine/definition/api';
+import { PUSH_BASE_URL, PUSH_CLOSED_FLOW, PUSH_TOKEN } from '../settings/Constants';
 import { RapidproUtils } from '../utils/RapidproUtils';
-import { PUSH_BASE_URL, PUSH_TOKEN, PUSH_CLOSED_FLOW } from '../settings/Constants';
 
 export class RocketEndpoint extends ApiEndpoint {
     public path = 'rocket/webhook';

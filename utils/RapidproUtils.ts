@@ -1,4 +1,5 @@
 import { IHttp, IHttpResponse, IRead } from '@rocket.chat/apps-engine/definition/accessors';
+import { emojione } from '../libs/emojione';
 
 export class RapidproUtils {
     private readonly MESSAGE_CHUNK_SIZE: number = 640;
@@ -108,14 +109,13 @@ export class RapidproUtils {
 
     public async broadcastMessages(messages: Array<any>, contacts: Array<string>) {
         messages.map( (message) => {
-            const msgText = message.msg;
+            let msgText = message.msg;
 
             if (msgText.length === 0) {
                 // TODO: Check how to handle attachments
                 // msgText = getAttachmentUrl(message, contacts)
             } else {
-                // TODO: Check how to handle emojis
-                // msgText = emojione.shortnameToImage(msgText)
+                msgText = emojione.shortnameToUnicode(msgText);
                 const msgs = this.chunkString(msgText, this.MESSAGE_CHUNK_SIZE);
 
                 if (!msgs) {
