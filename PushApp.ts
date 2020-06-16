@@ -18,7 +18,7 @@ import {
     PUSH_TAKEN_FLOW,
     PUSH_TOKEN,
     RC_CRM_URL,
-    RC_TIMEOUT,
+    REQUEST_TIMEOUT,
 } from './settings/Constants';
 
 export class PushApp extends App {
@@ -105,7 +105,7 @@ export class PushApp extends App {
         });
 
         await configuration.settings.provideSetting({
-            id:  RC_TIMEOUT,
+            id:  REQUEST_TIMEOUT,
             type: SettingType.NUMBER,
             packageValue: 30,
             required: true,
