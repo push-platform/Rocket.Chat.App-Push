@@ -1,9 +1,9 @@
 import { HttpStatusCode, IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { ApiEndpoint, IApiEndpointInfo, IApiRequest } from '@rocket.chat/apps-engine/definition/api';
 import { IApiResponseJSON } from '@rocket.chat/apps-engine/definition/api/IResponse';
+import { REQUEST_TIMEOUT } from '../settings/Constants';
 import { RapidproUtils } from '../utils/RapidproUtils';
 import { RocketUtils } from '../utils/RocketUtils';
-import { RC_TIMEOUT } from '../settings/Constants';
 
 export class ReceiveMessageEndpoint extends ApiEndpoint {
     public path = 'message/webhook';
@@ -20,7 +20,7 @@ export class ReceiveMessageEndpoint extends ApiEndpoint {
         const xauth = request.headers['x-auth-token'];
         const xuser = request.headers['x-user-id'];
         const siteUrl = await read.getEnvironmentReader().getServerSettings().getValueById('Site_Url');
-        const timeoutValue = await read.getEnvironmentReader().getSettings().getValueById(RC_TIMEOUT);
+        const timeoutValue = await read.getEnvironmentReader().getSettings().getValueById(REQUEST_TIMEOUT);
         const rocketUtils = new RocketUtils(read, http, xauth, xuser, siteUrl, timeoutValue);
 
         const token = request.query.token;
