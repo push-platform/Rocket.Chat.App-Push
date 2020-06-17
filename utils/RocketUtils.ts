@@ -7,9 +7,10 @@ export class RocketUtils {
     private timeoutValue;
     private http: IHttp;
     private read: IRead;
-    private DEPARTMENT_API_PATH = '/api/v1/livechat/department';
-    private VISITOR_API_PATH = '/api/v1/livechat/visitor';
-    private ROOM_API_PATH = '/api/v1/livechat/room';
+    private LIVECHAT_DEPARTMENT_API_PATH = '/api/v1/livechat/department';
+    private LIVECHAT_VISITOR_API_PATH = '/api/v1/livechat/visitor';
+    private LIVECHAT_ROOM_API_PATH = '/api/v1/livechat/room';
+    private LIVECHAT_ROOMS_API_PATH = '/api/v1/livechat/rooms';
     private LIVECHAT_MESSAGE_API_PATH = '/api/v1/livechat/message';
     private MESSAGE_API_PATH = '/api/v1/chat.getMessage';
 
@@ -24,7 +25,7 @@ export class RocketUtils {
 
     public async departmentIdFromName(departmentName: string): Promise<string | null> {
 
-        const departmentsResponse = await this.http.get(this.siteUrl + this.DEPARTMENT_API_PATH, {
+        const departmentsResponse = await this.http.get(this.siteUrl + this.LIVECHAT_DEPARTMENT_API_PATH, {
             headers: this.getAuthHeaders(),
             // timeout: this.getTimeout()
         });
@@ -48,7 +49,7 @@ export class RocketUtils {
 
     public async createVisitor(visitor: object): Promise<IHttpResponse | null> {
 
-        const visitorResponse = await this.http.post(this.siteUrl + this.VISITOR_API_PATH,
+        const visitorResponse = await this.http.post(this.siteUrl + this.LIVECHAT_VISITOR_API_PATH,
             {
                 headers: this.getAuthHeaders(),
                 content: JSON.stringify(visitor),
@@ -74,7 +75,7 @@ export class RocketUtils {
             // priority: priority ? priority : "null"
         };
 
-        const roomResponse = await this.http.get(this.siteUrl + this.ROOM_API_PATH,
+        const roomResponse = await this.http.get(this.siteUrl + this.LIVECHAT_ROOM_API_PATH,
             {
                 headers: this.getAuthHeaders(),
                 params: payload,
@@ -132,6 +133,22 @@ export class RocketUtils {
         );
 
         return messageResponse;
+    }
+
+    public async getOpenLivechatRooms() {
+
+        const payload = {
+            open: 'true',
+        };
+
+        const roomsResponse = await this.http.get(this.siteUrl + this.LIVECHAT_ROOMS_API_PATH,
+            {
+                headers: this.getAuthHeaders(),
+                params: payload,
+            },
+        );
+
+        return roomsResponse;
     }
 
     public getAuthHeaders() {

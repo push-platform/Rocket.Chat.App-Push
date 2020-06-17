@@ -51,10 +51,41 @@ export class CreateRoomEndpoint extends ApiEndpoint {
         const mediaTicket = await read.getEnvironmentReader().getSettings().getValueById(PUSH_MEDIA_FLOW);
         const rapidProUtils = new RapidproUtils(read, http, baseUrl, authToken, closeTicket, mediaTicket);
 
+        const room = await this.checkRoomDuplicate(rocketUtils, token);
+
+        if (room) {
+            console.log('Found duplicate room, returning the existing one...');
+            const duplicateRoomResponse: IApiResponseJSON = {
+                status: HttpStatusCode.OK,
+                content: room,
+            };
+            return duplicateRoomResponse;
+        }
+
         const newRoom = await this.createRoom(rocketUtils, rapidProUtils, visitor, priority, departmentName, token);
 
         return newRoom;
 
+    }
+
+    public async checkRoomDuplicate(rocketUtils: RocketUtils, token: string) {
+
+        const roomsResponse = await rocketUtils.getOpenLivechatRooms();
+        if (!roomsResponse.content) {
+            this.app.getLogger().error('Failed to get open rooms list');
+            return null;
+        }
+
+        let roomDuplicate = null;
+        const rooms = JSON.parse(roomsResponse.content).rooms;
+
+        rooms.map( (room) => {
+            if (room.v.token === token) {
+                roomDuplicate = room;
+            }
+        });
+
+        return roomDuplicate;
     }
 
     public getVisitorFromParams(params: object): object {
