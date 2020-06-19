@@ -108,7 +108,7 @@ export class CreateRoomEndpoint extends ApiEndpoint {
             this.app.getLogger().error(errorMessage);
             return httpErrorResponse(HttpStatusCode.BAD_REQUEST, errorMessage);
         }
-
+        // TODO: check if getNowDate() gives right time in production environment
         const after = msgsAfter ? msgsAfter : getNowDate();
         const logMessage = await rapidProUtils.getLogMessages(token, after);
 

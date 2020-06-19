@@ -17,7 +17,7 @@ export class RapidproUtils {
         this.closeTicket = closeTicket;
     }
 
-    public getAuthorizationHeader() {
+    public getHeaders() {
         const auth = this.authToken;
         return {Authorization: `Token ${auth}`};
     }
@@ -28,26 +28,26 @@ export class RapidproUtils {
     public async getLogMessages(token: string, after: string): Promise<any> {
 
         const messagesResponse = await this.getContactMessages(token, after);
-        const messages = messagesResponse.data.results.reverse();
+        const messages = messagesResponse.data.results;
 
         // TODO: Check if logMessage really works in all edge cases
         let logMessage = 'Log:\n';
-        messages.map( (message) => {
-            const time = this.getDateTime(message);
-            const icon = message.direction === 'out' ? `:robot: ${time}` : `:bust_in_silhouette: ${time}`;
-            const lines = this.getUserMessage(message);
-            const firstLine = this.formatUserMessage(lines.shift(), message);
+        for (let i = messages.length - 1; i >= 0; i--) {
+            const time = this.getDateTime(messages[i]);
+            const icon = messages[i].direction === 'out' ? `:robot: ${time}` : `:bust_in_silhouette: ${time}`;
+            const lines = this.getUserMessage(messages[i]);
+            const firstLine = this.formatUserMessage(lines.shift(), messages[i]);
 
             let text = `> ${icon} ${firstLine}`;
 
             lines.map( (line) => {
                 if (line.length > 0) {
-                    const msg = this.formatUserMessage(line, message);
+                    const msg = this.formatUserMessage(line, messages[i]);
                     text = text.concat(`\n>${msg}`);
                 }
             });
             logMessage = logMessage.concat(text + '\n');
-        });
+        }
 
         return messages ? (messages.length > 0 ? logMessage : null) : null;
     }
@@ -61,7 +61,7 @@ export class RapidproUtils {
         // TODO: RCAdmin checks if after is a string, but after analysis i dont think after can be anything else than a string, check if thats true
 
         const contactMessagesResponse = await this.http.get(url, {
-            headers: this.getAuthorizationHeader(),
+            headers: this.getHeaders(),
         });
 
         console.log(`Contact Messages Response: ${JSON.stringify(contactMessagesResponse)}`);
@@ -132,7 +132,7 @@ export class RapidproUtils {
     }
 
     public chunkString(str: string, length: number) {
-        return str.match(new RegExp('.{1,' + length + '}', 'g'));
+        return str.match(new RegExp('[\s\S]{1,' + length + '}', 'g'));
     }
 
     // TODO: Check if there's a way to create a generic function to build payloads from n arguments
@@ -193,7 +193,7 @@ export class RapidproUtils {
         const payload = this.buildBroadcastPayload(message, contacts = contacts);
 
         await this.http.post(url, {
-            headers: this.getAuthorizationHeader(),
+            headers: this.getHeaders(),
             data: payload,
         });
     }
@@ -208,7 +208,7 @@ export class RapidproUtils {
         const payload = this.buildFlowStartPayload(this.closeTicket, contacts, undefined, undefined, true, extra);
 
         await this.http.post(url, {
-            headers: this.getAuthorizationHeader(),
+            headers: this.getHeaders(),
             data: payload,
         });
 

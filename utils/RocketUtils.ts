@@ -24,7 +24,7 @@ export class RocketUtils {
     public async departmentIdFromName(departmentName: string): Promise<string | null> {
 
         const departmentsResponse = await this.http.get(this.siteUrl + this.DEPARTMENT_API_PATH, {
-            headers: this.getAuthHeaders(),
+            headers: this.getHeaders(),
             // timeout: this.getTimeout()
         });
 
@@ -49,7 +49,7 @@ export class RocketUtils {
 
         const visitorResponse = await this.http.post(this.siteUrl + this.VISITOR_API_PATH,
             {
-                headers: this.getAuthHeaders(),
+                headers: this.getHeaders(),
                 content: JSON.stringify(visitor),
                 // timeout: this.getTimeout()
             },
@@ -75,7 +75,7 @@ export class RocketUtils {
 
         const roomResponse = await this.http.get(this.siteUrl + this.ROOM_API_PATH,
             {
-                headers: this.getAuthHeaders(),
+                headers: this.getHeaders(),
                 params: payload,
                 // timeout: this.getTimeout()
             },
@@ -101,7 +101,7 @@ export class RocketUtils {
 
         const visitorMessageResponse = await this.http.post(this.siteUrl + this.MESSAGE_API_PATH,
             {
-                headers: this.getAuthHeaders(),
+                headers: this.getHeaders(),
                 data: payload,
                 // timeout: this.getTimeout()
             },
@@ -117,28 +117,8 @@ export class RocketUtils {
 
     }
 
-    public getAuthHeaders() {
+    public getHeaders() {
         return {'X-Auth-Token': this.xAuthToken, 'X-User-Id': this.xUserId};
-    }
-
-    public setXAuthToken(value: string) {
-        this.xAuthToken = value;
-    }
-
-    public setXUserId(value: string) {
-        this.xUserId = value;
-    }
-
-    public setSiteUrl(value: string) {
-        this.siteUrl = value;
-    }
-
-    public setTimeoutValue(value: number) {
-        this.timeoutValue = value;
-    }
-
-    public getTimeout() {
-        return this.timeoutValue >= 5 ? this.timeoutValue : 5;
     }
 
 }

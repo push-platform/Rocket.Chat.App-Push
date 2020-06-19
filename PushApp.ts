@@ -111,7 +111,7 @@ export class PushApp extends App {
             packageValue: 30,
             required: true,
             public: false,
-            i18nLabel: 'config_push_timeout',
+            i18nLabel: 'config_timeout',
         });
 
     }

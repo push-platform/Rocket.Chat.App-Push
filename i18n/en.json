@@ -7,5 +7,5 @@
     "config_push_queued_flow": "Queued Event",
     "config_push_closed_flow": "Closed Event",
     "config_push_media_flow" : "Media Event",
-    "config_push_timeout"    : "Timeout (seconds)"
+    "config_timeout"    : "Timeout (seconds)"
 }
